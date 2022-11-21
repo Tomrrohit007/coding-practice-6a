@@ -104,6 +104,7 @@ app.delete("/districts/:districtId/", async (request, response) => {
   response.send("District Removed");
 });
 
+
 // PUT API
 app.put("/districts/:districtId/", async (request, response) => {
   const { districtName, stateId, cases, cured, active, deaths } = request.body;
