@@ -41,7 +41,7 @@ const snakeToCamel = (dbObj) => {
     totalCases: dbObj.cases,
     totalCured: dbObj.cured,
     totalActive: dbObj.active,
-    totolDeaths: dbObj.deaths,
+    totalDeaths: dbObj.deaths,
   };
 };
 
@@ -75,9 +75,16 @@ app.get("/districts/:districtId/", async (request, response) => {
 
 app.get("/states/:stateId/stats/", async (request, response) => {
   const { stateId } = request.params;
-  const Query = `SELECT SUM(cases) as cases, SUM(cured) as cured, SUM(active) as active, SUM(deaths) as deaths FROM district WHERE state_id = ${stateId} GROUP BY state_id;`;
+  const Query = `SELECT
+                 SUM(cases) as totalCases, 
+                 SUM(cured) as totalCured, 
+                 SUM(active) as totalActive, 
+                 SUM(deaths) as totalDeaths 
+                 FROM district 
+                 WHERE state_id = ${stateId} 
+                 GROUP BY state_id;`;
   const dbResponse = await db.get(Query);
-  response.send(snakeToCamel(dbResponse));
+  response.send(dbResponse);
 });
 
 // GET API 5
@@ -91,7 +98,9 @@ app.get("/districts/:districtId/details/", async (request, response) => {
 // POST API
 app.post("/districts/", async (request, response) => {
   const { districtName, stateId, cases, cured, active, deaths } = request.body;
-  const Query = `INSERT INTO district (district_name, state_id, cases, cured, active, deaths) VALUES('${districtName}', ${stateId}, ${cases}, ${cured}, ${cured}, ${deaths});`;
+  const Query = `INSERT INTO 
+  district (district_name, state_id, cases, cured, active, deaths)
+   VALUES('${districtName}', ${stateId}, ${cases}, ${cured}, ${active}, ${deaths});`;
   await db.run(Query);
   response.send("District Successfully Added");
 });
@@ -108,9 +117,14 @@ app.delete("/districts/:districtId/", async (request, response) => {
 app.put("/districts/:districtId/", async (request, response) => {
   const { districtName, stateId, cases, cured, active, deaths } = request.body;
   const { districtId } = request.params;
-  const Query = `INSERT INTO
-   district (district_name, state_id, cases, cured, active, deaths) 
-   VALUES('${districtName}', ${stateId}, ${cases}, ${cured}, ${cured}, ${deaths});`;
+  const Query = `UPDATE district SET 
+    district_name = '${districtName}',
+    state_id =  ${stateId}, 
+    cases = ${cases},
+    cured = ${cured}, 
+    active = ${active}, 
+    deaths =  ${deaths}
+   WHERE district_id = ${districtId};`;
   await db.run(Query);
   response.send("District Details Updated");
 });
